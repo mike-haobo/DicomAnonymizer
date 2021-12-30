@@ -206,7 +206,7 @@ class DicomAnonymizer:
         dcmCaseFile=self.GetDcmCaseFile()
         timeStamp=self.GetStartTime()
         with open(outName, "wb") as fid:
-            fid.write(("源Patient ID,源Patient Name,脱敏Patient ID,脱敏Patient Name,已完成文件数,总文件数,源文件路径\n").encode("utf8"))
+            fid.write(("Source Patient ID,Source Patient Name,Anonymized Patient ID,Anonymized Patient Name,Successful DICOM Files,Total DICOM Files,Source Path of DICOM Case\n").encode("utf8"))
             for uId, alias in dcmAnonyAlias.items():
                 anonyPatientID="%s_%s" % (timeStamp, alias)
                 anonyPatientName=alias
@@ -334,6 +334,11 @@ class DicomAnonymizer:
         if "i" not in locals().keys():
             self.UpdateInfoTable()        
             self.SetState("ParseEmptyDir")
+            return
+
+        if "uniqueID" not in locals().keys():
+            self.UpdateInfoTable()        
+            self.SetState("ParseInvalidDir")
             return
 
         if self.verbose :

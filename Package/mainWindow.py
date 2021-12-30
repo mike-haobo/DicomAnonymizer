@@ -9,6 +9,63 @@ from PyQt5.QtGui import QColor
 
 from coreFunction import DicomAnonymizer
 
+class TagTransfer:
+    def __init__(self, lang="en"):
+        # Init Tag Alias for CN & EN
+        tag_dict=dict()
+        tag_dict["en"]=dict()
+        tag_dict["cn"]=dict()
+        tag_dict["en"]["SourcePatientID"]="Source Patient ID"
+        tag_dict["cn"]["SourcePatientID"]="源Patient ID"
+        tag_dict["en"]["SourcePatientName"]="Source Patient Name"
+        tag_dict["cn"]["SourcePatientName"]="源Patient Name"
+        tag_dict["en"]["AnonyPatientID"]="Anonymized Patient ID"
+        tag_dict["cn"]["AnonyPatientID"]="脱敏Patient ID"
+        tag_dict["en"]["AnonyPatientName"]="Anonymized Patient Name"
+        tag_dict["cn"]["AnonyPatientName"]="脱敏Patient Name"
+        tag_dict["en"]["SuccessNumber"]="Successful DICOM Files"
+        tag_dict["cn"]["SuccessNumber"]="已完成文件数"
+        tag_dict["en"]["TotalNumber"]="Total DICOM Files"
+        tag_dict["cn"]["TotalNumber"]="总文件数"
+        tag_dict["en"]["PathCase"]="Source Path of DICOM Cases"
+        tag_dict["cn"]["PathCase"]="源文件示例路径"
+
+        tag_dict["en"]["WinTitle"]="DICOM Anonymizer"
+        tag_dict["cn"]["WinTitle"]="DICOM脱敏和结构化工具"
+        tag_dict["en"]["ParseFrame"]="Parse Configure:"
+        tag_dict["cn"]["ParseFrame"]="解析配置："
+        tag_dict["en"]["WorkDirLab"]="Work Directory:"
+        tag_dict["cn"]["WorkDirLab"]="工作路径："
+        tag_dict["en"]["PrefixLab"]="Anonymized Prefix:"
+        tag_dict["cn"]["PrefixLab"]="匿名化前缀："
+        tag_dict["en"]["StartNumLab"]="Anonymized Starting Number:"
+        tag_dict["cn"]["StartNumLab"]="匿名化起始编号："
+        tag_dict["en"]["ParseBtn"]="Parse DICOM Folders..."
+        tag_dict["cn"]["ParseBtn"]="开始解析"
+        tag_dict["en"]["OutputFrame"]="Output Configure:"
+        tag_dict["cn"]["OutputFrame"]="输出配置："
+        tag_dict["en"]["OutputDirLab"]="Output Directory:"
+        tag_dict["cn"]["OutputDirLab"]="输出路径："
+        tag_dict["en"]["ExportBtn"]="Anonymize and Export DICOM Folders..."
+        tag_dict["cn"]["ExportBtn"]="开始匿名化并导出"
+        tag_dict["en"]["ProgressTable"]="Anonymizing Progress"
+        tag_dict["cn"]["ProgressTable"]="匿名化进度"
+        tag_dict["en"]["StopBtn"]="Suspend..."
+        tag_dict["cn"]["StopBtn"]="中止..."
+
+        self.tag_dict=tag_dict
+        self.lang=lang
+    
+    def GetLang(self):
+        return self.lang
+
+    def SetLang(self, lang="en"):
+        self.lang=lang
+
+    def Alias(self, tag_name):
+        lang_tag=self.tag_dict[self.lang]
+        return lang_tag[tag_name]
+
 class GuiDcmAnonymizer(DicomAnonymizer, QThread):
     # Custom Signal
     updateSignal=pyqtSignal(str, list)
@@ -45,12 +102,15 @@ class GuiDcmAnonymizer(DicomAnonymizer, QThread):
 
 class InfoTableModel(QAbstractTableModel):
     """Model"""
-    def __init__(self):
+    def __init__(self, lang="en"):
         super(InfoTableModel, self).__init__()
+        tag=TagTransfer(lang=lang)
+        
         self._data = []
-        self._headers = ['  源Patient ID  ', '  源Patient Name  ',
-                '  脱敏Patient ID  ', '  脱敏Patient Name  ',
-                '  已完成文件数  ', '  总文件数  ', '  源文件示例  ']
+        self._headers = ['  %s  ' % tag.Alias("SourcePatientID"), '  %s  ' %  tag.Alias("SourcePatientName"),
+                '  %s  ' % tag.Alias("AnonyPatientID"), '  %s  ' % tag.Alias("AnonyPatientName"),
+                '  %s  ' % tag.Alias("SuccessNumber"), '  %s  ' % tag.Alias("TotalNumber"),
+                '  %s  ' % tag.Alias("PathCase")]
 
     def rowCount(self, parent=QModelIndex()):
         return len(self._data)
@@ -83,8 +143,10 @@ class InfoTableModel(QAbstractTableModel):
         return QVariant()
 
 class DcmMainWidget(QWidget):
-    def __init__(self):
+    def __init__(self, lang="cn"):
         super(DcmMainWidget, self).__init__()
+        tag=TagTransfer(lang=lang)
+        self.tag=tag
 
         # DICOM Anonymizer Sub-Class
         dcmAnonymizer=GuiDcmAnonymizer()
@@ -94,7 +156,7 @@ class DcmMainWidget(QWidget):
         self.setLayout(mainVBox)
 
         # Parsing Configure
-        parseGroupBox=QGroupBox("解析：")
+        parseGroupBox=QGroupBox(tag.Alias("ParseFrame"))
         mainVBox.addWidget(parseGroupBox)
 
         parseMainLayout=QVBoxLayout()
@@ -104,7 +166,7 @@ class DcmMainWidget(QWidget):
         workDirLayout=QHBoxLayout()
         parseMainLayout.addLayout(workDirLayout)
 
-        workDirLab=QLabel("工作路径：")
+        workDirLab=QLabel(tag.Alias("WorkDirLab"))
         workDirLayout.addWidget(workDirLab)
 
         workDirEty=QLineEdit()
@@ -117,24 +179,24 @@ class DcmMainWidget(QWidget):
         parseInfoLayout=QHBoxLayout()
         parseMainLayout.addLayout(parseInfoLayout)
 
-        anonyPrefixLab=QLabel("匿名化前缀：")
+        anonyPrefixLab=QLabel(tag.Alias("PrefixLab"))
         parseInfoLayout.addWidget(anonyPrefixLab)
 
         anonyPrefixEty=QLineEdit()
         parseInfoLayout.addWidget(anonyPrefixEty)
 
-        startNumberLab=QLabel("起始编号：")
+        startNumberLab=QLabel(tag.Alias("StartNumLab"))
         parseInfoLayout.addWidget(startNumberLab)
 
         startNumberEty=QLineEdit()
         parseInfoLayout.addWidget(startNumberEty)
 
         ## Parse Button
-        parsePerformBtn=QPushButton("解析DICOM文件")
+        parsePerformBtn=QPushButton(tag.Alias("ParseBtn"))
         #parseMainLayout.addWidget(parsePerformBtn)
 
         # Output Configure
-        outputGroupBox=QGroupBox("输出：")
+        outputGroupBox=QGroupBox(tag.Alias("OutputFrame"))
         mainVBox.addWidget(outputGroupBox)
 
         outputMainLayout=QVBoxLayout()
@@ -144,7 +206,7 @@ class DcmMainWidget(QWidget):
         outputDirLayout=QHBoxLayout()
         outputMainLayout.addLayout(outputDirLayout)
 
-        outputDirLab=QLabel("输出路径")
+        outputDirLab=QLabel(tag.Alias("OutputDirLab"))
         outputDirLayout.addWidget(outputDirLab)
 
         outputDirEty=QLineEdit()
@@ -153,12 +215,12 @@ class DcmMainWidget(QWidget):
         outputDirBtn=QPushButton("...")
         outputDirLayout.addWidget(outputDirBtn)
 
-        exportFileBtn=QPushButton("导出脱敏后DICOM文件")
+        exportFileBtn=QPushButton(tag.Alias("ExportBtn"))
         #outputMainLayout.addWidget(exportFileBtn)
         mainVBox.addWidget(exportFileBtn)
 
         # DICOM Info Table Panel
-        dcmTableGroupBox=QGroupBox("进度信息：")
+        dcmTableGroupBox=QGroupBox(tag.Alias("ProgressTable"))
         mainVBox.addWidget(dcmTableGroupBox)
 
         dcmTableMainLayout=QVBoxLayout()
@@ -167,7 +229,7 @@ class DcmMainWidget(QWidget):
         ## DICOM Table Model
         dcmTableView=QTableView()
         dcmTableMainLayout.addWidget(dcmTableView)
-        dcmTableModel=InfoTableModel()
+        dcmTableModel=InfoTableModel(lang=lang)
         dcmTableView.setModel(dcmTableModel)
 
         dcmTableHeader=dcmTableView.horizontalHeader()
@@ -264,6 +326,8 @@ class DcmMainWidget(QWidget):
         state 3: Anony DICOM
         state 4: Finish
         """
+        tag=self.tag
+        
         if state==1 or state==4:
             isDisabled=False
         else:
@@ -279,16 +343,16 @@ class DcmMainWidget(QWidget):
 
         if state==1: # Init
             self.exportFileBtn.setDisabled(False)
-            self.exportFileBtn.setText("导出脱敏后DICOM文件")
+            self.exportFileBtn.setText(tag.Alias("ExportBtn"))
         elif state==2: # Parse DICOM
             self.exportFileBtn.setDisabled(False)
-            self.exportFileBtn.setText("停止...")
+            self.exportFileBtn.setText(tag.Alias("StopBtn"))
         elif state==3: # Anony DICOM
             self.exportFileBtn.setDisabled(False)
-            self.exportFileBtn.setText("停止...")
+            self.exportFileBtn.setText(tag.Alias("StopBtn"))
         elif state==4: # Finish
             self.exportFileBtn.setDisabled(False)
-            self.exportFileBtn.setText("导出脱敏后DICOM文件")
+            self.exportFileBtn.setText(tag.Alias("ExportBtn"))
 
         self.state=state
 
@@ -389,6 +453,10 @@ class DcmMainWidget(QWidget):
                 QMessageBox.warning(self, 'Empty Work Directory',
                         'Empty work directory "%s", please check!' % self.workDirStr)
                 self.SetState(1)
+            elif self.dcmAnonymizer.GetState()=="ParseInvalidDir":
+                QMessageBox.warning(self, 'Invalid Work Directory',
+                        'Invalid work directory "%s", no DICOM files in this directory, please check!' % self.workDirStr)
+                self.SetState(1)
             elif self.dcmAnonymizer.GetState()=="Anony":
                 QMessageBox.warning(self, 'Anonymous Problem',
                         'Anonymous unknown error!')
@@ -423,14 +491,12 @@ class DcmMainWidget(QWidget):
                 dcmAnonymizer.wait()
 
 class DcmMainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, lang="en", width=850, height=400):
         super().__init__()
+        tag=TagTransfer(lang=lang)
 
-        width=850
-        height=400
-
-        self.setWindowTitle("DICOM数据脱敏工具")
-        mainWidget=DcmMainWidget()
+        self.setWindowTitle(tag.Alias("WinTitle"))
+        mainWidget=DcmMainWidget(lang=lang)
         self.setCentralWidget(mainWidget)
 
         self.setMinimumSize(width, height)
@@ -442,12 +508,3 @@ if __name__ == '__main__':
     win.show()
 
     sys.exit(app.exec_())
-    #g=GuiDcmAnonymizer()
-    #g.SetDcmWorkDir("./TestData/RESEARCH_64CH_20190722_083141_685000/")
-    #g.SetDcmWorkDir("./TestData")
-    #g.SetDcmOutDir("./SortedDataPart")
-    #g.SetDcmAnonyPrefix("Patient")
-    #g.SetDcmAnonyStartP(1)
-    #g.ParseDicom()
-
-    #sys.exit(app.exec_())
