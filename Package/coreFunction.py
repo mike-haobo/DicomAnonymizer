@@ -327,7 +327,8 @@ class DicomAnonymizer:
                     if i%self.updateStep==0:
                         self.UpdateInfoTable()
                     
-            except pydicom.errors.InvalidDicomError: # Except Info
+            except: # Except Info
+            #except pydicom.errors.InvalidDicomError: # Except Info
                 invalidDcmInFullFileList.append(entry.path)
         
         # Print Info     
