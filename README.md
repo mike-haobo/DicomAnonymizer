@@ -12,7 +12,7 @@ Developped by Beijing Intelligent Brain Cloud, Inc., Beijing, China.
 DICOM Anonymizer use GPLv3 license.
 
 ## Standalone Release
-Standalone version have been released at [DICOM Anonymizer Release](https://github.com/mike-haobo/DicomAnonymizer/releases)
+Standalone version have been released at [DICOM Anonymizer Release](https://github.com/HB-CLOUD/DicomAnonymizer/releases/tag/v1.0)
 
 ## Dependency
 We developed DICOM Anonymizer based on the following library, however older version should also work.
