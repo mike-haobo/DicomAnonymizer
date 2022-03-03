@@ -214,8 +214,8 @@ class DicomAnonymizer:
                                                   anonyPatientID, anonyPatientName, dcmSuccessNum[uId], dcmTotalNum[uId],
                                                   dcmCaseFile[uId]) ).encode("utf8"))
     
-    def SetStartTime(self, startTime=time.time() ):
-        self.startTime=time.strftime("%Y%m%d%H%M%S", time.localtime(startTime))
+    def SetStartTime(self):
+        self.startTime=time.strftime("%Y%m%d%H%M%S", time.localtime())
     
     def GetStartTime(self):
         return self.startTime
